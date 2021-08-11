@@ -14,165 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 Paquetes:
 - `ggplot2`
 - `gapminder` (necesita instalarse)
-
-# Gramática de los gráficos
-
-## Importancia
-
-La habilidad de crear gráficos a partir de los datos que recolectamos potencia nuestra capacidad de análisis. Los gráficos nos pueden ayudar a percibir de manera rápida patrones de comportamiento en nuestra data y, al mismo tiempo, resumir de manera visual aquello que queremos mostrar a nuestra audiencia.
-
-Esta sesión tiene como objetivo explicar el uso de la gramática de los gráficos, un marco conceptual cuya aplicación permite realizar visualizaciones de datos de manera sencilla y coherente. No vamos a buscar explicar todos los elementos teóricos que existen detrás del marco conceptual mencionado. En cambio, preferimos explicar sólo los elementos clave, usando ejemplos claros para que, al finalizar la, **cualquiera pueda intentar crear sus propios gráficos**.
-
----
-
-No somos las primeras personas en tratar de explicar este tema. De hecho, este tutorial será una adaptación del gran trabajo realizado por [Chester Ismay](https://chester.rbind.io/) y [Albert Y. Kim](https://rudeboybert.rbind.io/) en su libro [*Statistical Inference via Data Science: A ModernDive into R and the Tidyverse*](https://moderndive.com/2-viz.html).
-
-## Conjunto de datos
-
-Durante esta sesión usaremos el conjunto de datos `gapminder` que viene incluido dentro del paquete `gapminder` para los gráficos de ejemplo. Si aún no cuentas con el paquete, puedes instalarlo usando el siguiente código en la consola.
-
-```{r, eval=FALSE}
-install.packages("gapminder")
-```
-
-La instalación de paquetes es un proceso que debe realizarse una sola vez. Cuando requieras usar un paquete instalado debes *llamarlo* usando la función `library()`.
-
----
-
-```{r}
-library(gapminder)
-```
-
-```{r}
-gapminder
-```
-
-## No olvidar
-
-Recuerda que `gapminder` es un set de datos que ha sido previamente limpiado y ordenado. Normalmente, estos son pasos previos que debe realizar el analista de datos.
-
-<center>
-![](images/dog-werewolf.png){width=500px}
-</center>
-
-
-## La gramática
-
-El paquete `ggplot2`, elaborado por [Hadley Wickham](http://hadley.nz/) es la implementanción en R de la gramática de los gráficos, teoría desarrollada por [Leland Wilkinson](https://www.cs.uic.edu/~wilkinson/). 
-
-```{r library1, echo=TRUE}
-# Sólo ggplot2
-library(ggplot2)
-```
-
-Puedes cargar `ggplot2` individualmente o junto con los paquetes del `tidyverse`.
-
-```{r library2, eval=FALSE, echo=TRUE}
-# Todo el tidyverse
-library(tidyverse)
-```
-
----
-
-Del mismo modo que para construir una oración en nuestro idioma, hacemos uso de combinaciones de palabras (que pueden ser sustantivos, verbos, adjetivos, etc)  siguiendo un conjunto de reglas conocido como *gramática*, la *gramática de los gráficos* nos brinda las reglas para construir gráficos estadísticos. 
-
-## Componentes de la gramática
-
-En pocas palabras, la gramática de los gráficos nos quiere decir que:
-
-> Un gráfico estadístico es el **mapeo** de variables en nuestra **data** en  atributos **estéticos** de figuras **geométricas**. 
-
----
-
-Podemos construir un gráfico a partir de tres componentes esenciales:
-
-1. `data`: el set de datos que contiene las variables de interés
-2. `geom`: las figuras geométricas en cuestión. Nos referimos al tipo de objeto que podemos observar en un gráfico. Por ejemplo: puntos, líneas o barras. 
-3. `aes`: los atributos estéticos de la figura geométrica. Por ejemplo, su posición en los ejes x/y, color, forma y tamaño. Los atributos estéticos son *mapeados* a las variables contenidas en nuestro set de datos. 
-
-## Un breve ejemplo
-
-Para mostrar lo simple que puede resultar graficar usando los componentes mencionados, usaremos datos del paquete `gapminder`. Para este primer ejemplo utilizaremos sólo los datos de expectativa de vida en Perú a lo largo de los años. Para ello crearemos `df_ejemplo` usando algunas funciones del paquete `dplyr`. 
-
-```{r df_ejemplo, echo=TRUE}
-library(dplyr)
-
-datos_peru <- gapminder %>% 
-  select(country, year, lifeExp) %>% 
-  filter(country == "Peru")
-```
-
-Ahora que tenemos `df_ejemplo`, sólo necesitamos usar dos líneas de código para ver la evolución de la expectativa de vida de los peruanos. Recuerda que para ello hemos cargado previamente `ggplot2`.
-
----
-
-```{r plot_ex1}
-ggplot(data = datos_peru, mapping = aes(x = year, y = lifeExp)) +
-  geom_line()
-```
-
----
-
-¿Cómo funciona la gramática? Anteriormente te habíamos mencionado que `ggplot` requiere tres componentes básicos para crear gráficos: los datos, el mapeo de variables y las figuras geométricas que representarán nuestros datos. 
-
-En el código anterior: 
-
-1. Le indicamos a la función `ggplot()` que nuestra *data* será `df_ejemplo`.
-2. Con *mapping* le pedimos que mapee la variable `year` al eje *X* y la variable `lifeExp` al eje *Y*. 
-3. Además de hacer esto, es necesario indicarle qué figura geométrica debe usar `ggplot` para representar nuestros datos. Esta instrucción se la indicamos con `geom_line()`, pidiendole que lo haga con una línea.
-
-## ggplot conciso
-
-Debido a que el primer argumento siempre será nuestra data, y en el mapeo de variables los dos primeros atributos siempre corresponden al eje *X* y al eje *Y*, podemos reescribir el código del gráfico anterior de forma más concisa.
-
----
-
-```{r plot_ex2}
-ggplot(datos_peru, aes(year, lifeExp)) + 
-  geom_line()
-```
-
-
----
-
-¡Pero no te confíes! Date cuenta que para agregar elementos después de la función `ggplot()`, hacemos uso del operador de suma y no de *pipes*.
-
-## Puedo asignar mis gráficos a nombres
-
-Los gráficos creados con `ggplot()` son un nuevo tipo de objeto. Como tal, puede usarse el operador de asignamiento para almacenarlos en nuestro ***Environment***. Por ejemplo, creamos el objeto `gráfico`.
-
-```{r}
-grafico <- ggplot(datos_peru, aes(year, lifeExp))
-```
-
-Ahora sólo haría falta agregarle una geometría.
-
----
-
-```{r}
-grafico +
-    geom_line()
-```
-
----
-
-```{r}
-grafico +
-    geom_col()
-```
-
----
-
-```{r}
-grafico +
-    geom_point()
-```
-
----
-
-¿Cómo determinar el correcto tipo de gráficos según los datos que tengo?
-
-¿En qué casos debo usar columnas?¿En qué casos debo usar puntos?
+- `ggthemes` (necesita instalarse)
 
 # Repaso de tipos de variables
 
@@ -243,6 +85,14 @@ Se refieren a características o atributos cuyas posibilidades de variación no 
 
 Las variables categóricas pueden ser nominales u ordinales
 
+## Variables categóricas ordinales
+
+Las variables categóricas son ordinales cuando sí tienen un orden lógico natural. Es decir, las categorías representan valores que pueden ordenarse de menor a mayor o viceversa. Por ejemplo:
+
+- Nivel educativo
+- Grado de apoyo a la democracia (Bajo, Medio, Alto)
+- Frecuencia de consumo de gaseosa (Diario, Semanal, Mensual, Anual, etc)
+
 ## Variables categóricas nominales
 
 Las variables categóricas son nominales cuando no tienen un orden lógico natural. Es decir, las categorías no representan valores que pueden ordenarse de menor a mayor, o viceversa. Por ejemplo:
@@ -250,16 +100,221 @@ Las variables categóricas son nominales cuando no tienen un orden lógico natur
 - Sexo (Hombre, Mujer)
 - Región de nacimiento
 - Tipo de dispositivo (Smartphone, Laptop, PC de escritorio, Tablet)
-- Compañía de internet 
+- Compañía proveedora de internet 
 
-## Variables categóricas ordinales
+## Ejercicios
 
+Dentro de tu grupo, discute de qué tipo son las siguientes variables:
 
+- Ingreso mensual por trabajo remunerado de 1000 personas
+- Signo zodiacal de 100 personas
+- Número telefónico de 500 hospitales
+- Promedio de páginas de libros leídas semanalmente en un año para 200 estudiantes
+- Mes de nacimiento de 10 personas
+- Grupo etáreo de 300 personas
+- Porcentaje de docentes a tiempo completo en 100 instituciones educativas
+- Número de días con visitas permitidas para 50 presidiarios
+- Número de DNI de 200 personas
+- Temperatura corporal de una (1) persona
+
+# Descanso de 5 minutos
 
 ## Tratamiento de las variables en una escala gráfica
 
+Cuando realizamos nuestros gráficos, la computadora trata todos nuestros datos como si fueran números.
+
+Miremos el gráfico de la siguiente diapositiva. Representa la cantidad de diamantes según su tipo de corte.
+
+---
+
+```{r, echo=FALSE}
+ggplot2::ggplot(ggplot2::diamonds, ggplot2::aes(cut)) +
+  ggplot2::geom_bar() +
+  ggplot2::labs(x="corte", y="recuento")
+```
+
+El gráfico representa el *recuento* de observaciones por cada categoría de la variable *corte*.
+
+---
+
+Antes de poder representar nuestros datos de forma gráfica, necesitamos, obviamente, tener los datos. En este caso, el set de datos luce de esta manera:
+
+```{r}
+ggplot2::diamonds |>
+  dplyr::count(cut) |>
+  dplyr::rename(corte = cut, recuento = n)
+```
+
+Vemos que la variable *corte* es netamente categórica. Sin embargo, asume una posición en el eje X. Internamente, R trata a las variables categóricas como numéricas discretas para poder representar su información en una escala gráfica. 
+
+Por esto, de ahora en adelante, cuando nos refiramos a variables *discretas*, nos estamos refiriendo tanto a variables categóricas como a numéricas discretas con poca cantidad de valores posibles.
+
+# Gramática de los gráficos
+
+## Importancia
+
+La habilidad de crear gráficos a partir de los datos que recolectamos potencia nuestra capacidad de análisis. Los gráficos nos pueden ayudar a percibir de manera rápida patrones de comportamiento en nuestra data y, al mismo tiempo, resumir de manera visual aquello que queremos mostrar a nuestra audiencia.
+
+Esta sesión tiene como objetivo explicar el uso de la gramática de los gráficos, un marco conceptual cuya aplicación permite realizar visualizaciones de datos de manera sencilla y coherente. No vamos a buscar explicar todos los elementos teóricos que existen detrás del marco conceptual mencionado. En cambio, preferimos explicar sólo los elementos clave, usando ejemplos claros para que, al finalizar la, **cualquiera pueda intentar crear sus propios gráficos**.
+
+---
+
+No somos las primeras personas en tratar de explicar este tema. De hecho, este tutorial será una adaptación del gran trabajo realizado por [Chester Ismay](https://chester.rbind.io/) y [Albert Y. Kim](https://rudeboybert.rbind.io/) en su libro [*Statistical Inference via Data Science: A ModernDive into R and the Tidyverse*](https://moderndive.com/2-viz.html).
+
+## Conjunto de datos
+
+Durante esta sesión usaremos el conjunto de datos `gapminder` que viene incluido dentro del paquete `gapminder` para los gráficos de ejemplo. Si aún no cuentas con el paquete, puedes instalarlo usando el siguiente código en la consola.
+
+```{r, eval=FALSE}
+install.packages("gapminder")
+```
+
+La instalación de paquetes es un proceso que debe realizarse una sola vez. Cuando requieras usar un paquete instalado debes *llamarlo* usando la función `library()`.
+
+---
+
+```{r}
+library(gapminder)
+```
+
+```{r}
+gapminder
+```
+
+## No olvidar
+
+Recuerda que `gapminder` es un set de datos que ha sido previamente limpiado y ordenado. Normalmente, estos son pasos previos que debe realizar el analista de datos.
+
+<center>
+![](images/dog-werewolf.png){width=500px}
+</center>
 
 
+## La gramática
+
+El paquete `ggplot2`, elaborado por [Hadley Wickham](http://hadley.nz/) es la implementanción en R de la gramática de los gráficos, teoría desarrollada por [Leland Wilkinson](https://www.cs.uic.edu/~wilkinson/). 
+
+```{r library1, echo=TRUE}
+# Sólo ggplot2
+library(ggplot2)
+```
+
+Puedes cargar `ggplot2` individualmente o junto con los paquetes del `tidyverse`.
+
+```{r library2, eval=FALSE, echo=TRUE}
+# Todo el tidyverse
+library(tidyverse)
+```
+
+---
+
+Del mismo modo que para construir una oración en nuestro idioma, hacemos uso de combinaciones de palabras (que pueden ser sustantivos, verbos, adjetivos, etc)  siguiendo un conjunto de reglas conocido como *gramática*, la *gramática de los gráficos* nos brinda las reglas para construir gráficos estadísticos. 
+
+## Componentes de la gramática
+
+En pocas palabras, la gramática de los gráficos nos quiere decir que:
+
+> Un gráfico estadístico es el **mapeo** de variables en nuestra **data** hacia atributos **estéticos** de figuras **geométricas**. 
+
+---
+
+Podemos construir un gráfico a partir de tres componentes esenciales:
+
+1. `data`: el set de datos que contiene las variables de interés
+2. `geom`: las figuras geométricas en cuestión. Nos referimos al tipo de objeto que podemos observar en un gráfico. Por ejemplo: puntos, líneas o barras. 
+3. `aes`: los atributos estéticos de la figura geométrica. Por ejemplo, su posición en los ejes x/y, color, forma y tamaño. Los atributos estéticos son *mapeados* a las variables contenidas en nuestro set de datos. 
+
+## Un breve ejemplo
+
+Para mostrar lo simple que puede resultar graficar usando los componentes mencionados, usaremos datos del paquete `gapminder`. Para este primer ejemplo utilizaremos sólo los datos de expectativa de vida en Perú a lo largo de los años. Para ello crearemos `datos_peru` usando algunas funciones del paquete `dplyr`. 
+
+```{r df_ejemplo, echo=TRUE}
+library(dplyr)
+
+datos_peru <- filter(gapminder, country == "Peru")
+```
+
+Ahora que tenemos `df_ejemplo`, sólo necesitamos usar dos líneas de código para ver la evolución de la expectativa de vida de los peruanos. Recuerda que para ello hemos cargado previamente `ggplot2`.
+
+---
+
+```{r plot_ex1}
+ggplot(data = datos_peru, mapping = aes(x = year, y = lifeExp)) +
+  geom_line()
+```
+
+---
+
+¿Cómo funciona la gramática? Anteriormente te habíamos mencionado que `ggplot` requiere tres componentes básicos para crear gráficos: los datos, el mapeo de variables y las figuras geométricas que representarán nuestros datos. 
+
+En el código anterior: 
+
+1. Le indicamos a la función `ggplot()` que nuestra *data* será `df_ejemplo`.
+2. Con *mapping* le pedimos que mapee la variable `year` al eje *X* y la variable `lifeExp` al eje *Y*. 
+3. Además de hacer esto, es necesario indicarle qué figura geométrica debe usar `ggplot` para representar nuestros datos. Esta instrucción se la indicamos con `geom_line()`, pidiendole que lo haga con una línea.
+
+## ggplot conciso
+
+Debido a que el primer argumento siempre será nuestra data, y en el mapeo de variables los dos primeros atributos siempre corresponden al eje *X* y al eje *Y*, podemos reescribir el código del gráfico anterior de forma más concisa.
+
+Para estos parámetros tan comunes (`data`,`x`, `y`), no necesitamos especificar su nombre cada vez.
+
+---
+
+```{r plot_ex2}
+ggplot(datos_peru, aes(year, lifeExp)) + 
+  geom_line()
+```
+
+## Comparación
+
+```{r, eval=FALSE}
+ggplot(data = datos_peru, mapping = aes(x = year, y = lifeExp)) +
+  geom_line()
+```
+
+```{r, eval=FALSE}
+ggplot(datos_peru, aes(year, lifeExp)) + 
+  geom_line()
+```
+
+
+## Puedo asignar mis gráficos a nombres
+
+Los gráficos creados con `ggplot()` son un nuevo tipo de objeto. Como tal, puede usarse el operador de asignamiento (`<-`) para almacenarlos en nuestro ***Environment***. Por ejemplo, creamos el objeto `gráfico`.
+
+```{r}
+grafico <- ggplot(datos_peru, aes(year, lifeExp))
+```
+
+Ahora sólo haría falta agregarle una geometría. Para ello, hacemos uso del operador de adición (`+`). Mira lo fácil que es cambiar entre un gráfico de líneas, de columnas y de puntos.
+
+---
+
+```{r}
+grafico +
+    geom_line()
+```
+
+---
+
+```{r}
+grafico +
+    geom_col()
+```
+
+---
+
+```{r}
+grafico +
+    geom_point()
+```
+
+---
+
+¿Cómo determinar el correcto tipo de gráficos según los datos que tengo?
+
+¿En qué casos debo usar columnas?¿En qué casos debo usar puntos?
 
 # Los cinco gráficos nombrados
 
@@ -269,7 +324,9 @@ Con el fin de conseguir una explicación simple, nos limitamos a mostrar cinco t
 
 ## Gráfico de barras o columnas
 
-El primer tipo de gráfico que veremos es el de barras. Resulta muy útil para mostrar la frecuencia de aparición de nuestros datos categóricos. Por ejemplo, podemos ver cuántos países encontramos por continente en las observaciones de `gapminder` correspondientes al año 2002. Podemos obtener esa información usando `dplyr`.
+El primer tipo de gráfico que veremos es el de barras. Resulta muy útil para mostrar estadísticas de resumen de nuestros datos categóricos. Por ejemplo, podemos ver cuántos países encontramos por continente en las observaciones de `gapminder` correspondientes al año 2002 y su promedio de expectativa de vida. Podemos obtener esa información usando funciones de `dplyr`.
+
+Si queremos contar con columnas verticales, mapeamos nuestra variable discreta al eje X y nuestra variable numérica al eje Y.
 
 ---
 
@@ -277,45 +334,32 @@ El primer tipo de gráfico que veremos es el de barras. Resulta muy útil para m
 (paises_por_continente <- gapminder %>% 
   filter(year == 2002) %>% 
   group_by(continent) %>% 
-  summarise(n = n()) %>% 
-  ungroup() )
+  summarise(
+    recuento = n(),
+    promedio_exp = mean(lifeExp)
+  ) %>% 
+  ungroup())
 ```
 
-Con esta información, podemos dibujar nuestro primer gráfico de barras haciendo uso de `geom_col()`. Usaremos el código anterior para no tener que crear un nuevo objeto.
+Con esta información, podemos dibujar nuestro primer gráfico de barras haciendo uso de `geom_col()`.
 
 ---
 
 ```{r geom_col}
-paises_por_continente %>% 
-  ggplot(aes(continent, n)) +
+ggplot(paises_por_continente, aes(continent, recuento)) +
   geom_col()
-```
-
----
-
-Realizar un gráfico de barras con el recuento de observaciones según categorías es tan común, que `ggplot2` incluye una función que nos evita tener que hacer el recuento manualmente. Esta vez crearemos el mismo gráfico usando `geom_bar()`, sin tener que hacer nuestro `recuento` primero.
-
----
-
-```{r geom_bar}
-gapminder %>% 
-  filter(year == 2002) %>% 
-  ggplot(aes(continent)) +
-  geom_bar()
 ```
 
 ## Gráfico de líneas
 
-El siguiente tipo de gráfico ya lo conocemos. Consiste en líneas que nos sirven generalmente para analizar la evolución en el tiempo de determinadas variables. Debido a ello, es muy común mapear en el exe *X* alguna variable de tiempo, y en el eje *Y* alguna variable cuantitativa, que sería nuestra variable de interés. 
+El siguiente tipo de gráfico ya lo conocemos. Consiste en líneas que nos sirven generalmente para analizar la evolución en el tiempo de determinadas variables. Debido a ello, es muy común mapear en el exe *X* alguna variable de tiempo, y en el eje *Y* alguna variable continua, que sería nuestra variable de interés. 
 
 Con `gapminder` podemos analizar la evolución del PBI per cápita peruano de 1952 a 2007. Para ello filtraremos sólo las observaciones pertenecientes a Perú. Para generar el gráfico de líneas usamos `geom_line()`.
 
 ---
 
 ```{r geom_line_1}
-gapminder %>% 
-  filter(country == "Peru") %>% 
-  ggplot(aes(year, gdpPercap)) +
+ggplot(datos_peru, aes(year, gdpPercap)) +
   geom_line()
 ```
 
@@ -325,18 +369,23 @@ gapminder %>%
 
 ## Histogramas
 
-Es posible hacer otro tipo de análisis usando una sola variable. El gráfico de barras nos mostraba cómo se distribuyen las observaciones de nuestras variables categóricas. Podemos esperar que exista un gráfico que nos muestre la distribución de variables numéricas. 
+Es posible hacer otro tipo de análisis usando una sola variable. El gráfico de columnas nos permitía ver cómo se distribuyen las observaciones de nuestras variables  discretas. Podemos esperar que exista un gráfico que nos muestre la distribución de variables continuas. 
 
-Esto lo conseguimos con los histogramas.En lugar de mostrar la frecuencia de observaciones según *categorías*, nos permiten agrupar los datos por *intervalos*. Veamos cómo se distribuye el PBI per cápita de todos los países del mundo en el año 2007. Para generar el histograma usamos `geom_histogram()`. Por defecto, `ggplot()` divide nuestra data en 30 intervalos.
+Esto lo conseguimos con los histogramas. En lugar de mostrar la frecuencia de observaciones según *categorías*, nos permiten agrupar los datos por *intervalos*. Veamos cómo se distribuye el PBI per cápita de todos los países del mundo en el año 2007. Para generar el histograma usamos `geom_histogram()`. Por defecto, `ggplot()` divide nuestra data en 30 intervalos.
+
+```{r}
+datos_2007 <- filter(gapminder, year == 2007)
+```
+
+En este caso, sólo indicaremos la variable del eje X, porque el eje Y se calcula en base a los intervalos automáticos.
 
 ---
 
 ```{r geom_histogram}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap)) +
+ggplot(datos_2007, aes(gdpPercap)) +
   geom_histogram()
 ```
+
 
 ---
 
@@ -351,16 +400,17 @@ Con esto podemos responder alguna preguntas como:
 
 Otra manera de ver la distribución de nuestros valores es haciendo uso de diagramas de caja o *boxplot*. En este caso, es más entenderlo si primero hemos visto alguno. Para dibujarlo, usamos `geom_boxplot()`. 
 
+Para obtener una *caja* que represente a todo nuestro conjunto de datos, sólo necesitamos especificar el eje X.
+
 ---
 
 ```{r geom_boxplot1}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap)) +
+ggplot(datos_2007, aes(gdpPercap)) +
   geom_boxplot()
 ```
+---
 
-Lo primero que vemos es una especie de "caja" que busca representar nuestros valores. La línea negra remarcada al centro de la caja nos indica dónde encontramos el punto medio de nuestros datos (la mediana). Esta representación nos permite ubicar nuestros datos en cuatro segmentos importantes:
+Vemos una especie de "caja" que busca representar nuestros valores. La línea negra remarcada al centro de la caja nos indica dónde encontramos el punto medio de nuestros datos (la mediana). Esta representación nos permite ubicar nuestros datos en cuatro segmentos importantes:
 
 1. Todo lo que está "fuera" de la caja en el lado izquierdo representa el primer 25% de nuestros datos, también conocido como el primer cuartil o cuartil inferior. Son  los valores más bajos.
 2. Todo lo que está en la primera mitad de la "caja" representa el segundo 25% de nuestros datos, conocido el segundo cuartil.
@@ -371,14 +421,12 @@ Lo primero que vemos es una especie de "caja" que busca representar nuestros val
 
 Habrás podido notar que además aparecen algunos puntos dibujados fuera de nuestros cuatro segmentos. Estos representan valores extremos, también conocidos como *outliers*. Pueden aparecer tanto en el lado más alto como en el más bajo de nuestros datos. Para determinar su existencia se utiliza un cálculo usando el Rango Intercuartil. Si no entiendes esta parte por ahora, no te preocupes, con que entiendas que son valores extremos es suficiente. 
 
-Algo muy útil que nos permiten hacer los *boxplot* es comparar la distribución de nuestros valores entre diferentes categorías. Por ejemplo, el PBI per cápita entre lo cinco continentes.
+Algo muy útil que nos permiten hacer los *boxplot* es comparar la distribución de nuestros valores entre diferentes categorías. Para ello, podemos mapear una variable discreta al eje Y. Por ejemplo, el PBI per cápita de los cinco continentes.
 
 ---
 
 ```{r geom_boxplot2}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap, continent)) +
+ggplot(datos_2007, aes(gdpPercap, continent)) +
   geom_boxplot()
 ```
 
@@ -390,7 +438,7 @@ De esta manera, podemos ver que incluso los valores más altos de PBI en África
 
 Además de ver las características de una variable en particular, ya sea viendo su evolución en el tiempo o su distribución, podemos pensar en cómo analizar la relación *entre* nuestras variables. Por ejemplo, ¿qué relación existe entre el PBI per cápita y la expectativa de vida? Piensa un poco en esto y trata de responder la siguiente pregunta: ¿Existirá mayor expectativa de vida en países que tienen un PBI per cápita alto?
 
-Para responder a esto podemos hacer uso de un diagrama de dispersión, también conocido como *diagrama de puntos*. Nos sirve para ver la relación existente entre dos variables, también conocida como **correlación**. 
+Para responder a esto podemos hacer uso de un diagrama de dispersión, también conocido como *diagrama de puntos*. Nos sirve para ver la relación existente entre dos variables continuas, también conocida como **correlación**. 
 
 ---
 
@@ -399,9 +447,7 @@ A continuación, analizaremos la relación entre el PBI per cápita y la expecta
 ---
 
 ```{r geom_point1}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap, lifeExp)) +
+ggplot(datos_2007, aes(gdpPercap, lifeExp)) +
   geom_point()
 ```
 
@@ -411,18 +457,32 @@ Algo que podemos notar rápidamente es que existen gran cantidad de países con 
 
 Para ver la distribución en los países con menor PBI per cápita podemos filtrar sólo los valores menores a 10000.
 
+```{r}
+datos_2007_filtrado <- filter(datos_2007, gdpPercap < 10000)
+```
+
+
 ---
 
 ```{r geom_point2}
-gapminder %>% 
-  filter(year == 2007, gdpPercap < 10000) %>% 
-  ggplot(aes(gdpPercap, lifeExp)) +
+ggplot(datos_2007_filtrado, aes(gdpPercap, lifeExp)) +
   geom_point()
 ```
 
 ---
 
 Nuevamente, podemos ver que los países con mayor PBI per cápita tienen la expectativa de vida más alta. Sin embargo, ahora además podemos ver con mayo claridad que aunque en los países con menor PBI per cápita la expectativa de vida es variada, generalmente se encuentra en los valores más bajos.
+
+## Ejercicios
+
+1. Crea un nuevo proyecto en tu carpeta R: 02-ejercicios
+2. Ejecutar `getwd()` en la consola. Comparte el resultado en el chat de la llamada.
+3. Crea un nuevo archivo R Markdown: ejercicios.Rmd
+4. Adapta el código usado para crear `datos_2007` de tal manera que puedas obtener los datos de 1952 y crear el objeto `datos_1952`.
+5. Haz el diagrama de cajas para la expectativa de vida por continente usando  `datos_1952`
+6. Sube el resultado a Rpubs.com y comparte el enlace en el chat de la llamada.
+
+# Descanso de 5 minutos
 
 # Personalización de las geometrías
 
@@ -439,9 +499,7 @@ Pensemos en un gráfico de barras. Habíamos visto que es posible crearlo usando
 ---
 
 ```{r color1}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(continent)) +
+ggplot(datos_2007, aes(continent)) +
   geom_bar()
 ```
 
@@ -452,9 +510,7 @@ El gráfico nos permite identificar una columna con cada uno de los continentes,
 ---
 
 ```{r color2}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(continent, fill = continent)) +
+ggplot(datos_2007, aes(continent, fill = continent)) +
   geom_bar()
 ```
 
@@ -467,15 +523,13 @@ Para poder apreciar cómo el color nos puede apreciar a explotar nuestros datos,
 ---
 
 ```{r color3, exercise=TRUE}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap, lifeExp, color = continent)) +
+ggplot(datos_2007, aes(gdpPercap, lifeExp, color = continent)) +
   geom_point()
 ```
 
 ---
 
-Podemos seguir viendo que existe una relación positiva entre PBI per cápita y expectativa de vida, pero además ahora podemos ver a qué continente pertecen los países con PBI per cápita más alto y más bajo.
+Podemos seguir viendo que existe una relación positiva entre PBI per cápita y expectativa de vida, pero además ahora podemos ver a qué continente pertenecen los países con PBI per cápita más alto y más bajo.
 
 Sin embargo, te habrás dado cuenta que para el código de barras hemos usado el argumento `fill` pero en el diagrama de puntos hemos usado `color`. 
 
@@ -491,20 +545,18 @@ Del mismo, usar el atributo de tamaño nos permite identificar nueva informació
 ---
 
 ```{r size1, exercise=TRUE}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap, lifeExp, size = pop)) +
+ggplot(datos_2007, aes(gdpPercap, lifeExp, size = pop)) +
   geom_point()
 ```
+
+---
 
 Nuevamente, `ggplot2` nos proporciona una leyenda automática. Así podemos ver que para el año 2007, los países con los valores de población más extremos, tienen un PBI per cápita bajo. Podemos combinar al mismo tiempo el uso de tamaño con el color para ver también la distribución según continentes. 
 
 ---
 
 ```{r size2, exercise=TRUE}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap, lifeExp, size = pop, color = continent)) +
+ggplot(datos_2007, aes(gdpPercap, lifeExp, size = pop, color = continent)) +
   geom_point()
 ```
 
@@ -521,9 +573,7 @@ Debes tener en cuenta que no todo el mundo percibe los colores de la misma maner
 ---
 
 ```{r shape1, exercise=TRUE}
-gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap, lifeExp, shape = continent, color = continent)) +
+ggplot(datos_2007, aes(gdpPercap, lifeExp, shape = continent, color = continent)) +
   geom_point()
 ```
 
@@ -542,9 +592,7 @@ Por último, usar etiquetas significativas hará que nuestros gráficos hablen p
 Conservamos `grafico_puntos` para usarlo como ejemplo.
 
 ```{r}
-grafico_dispersion <- gapminder %>% 
-  filter(year == 2007) %>% 
-  ggplot(aes(gdpPercap, lifeExp, shape = continent, color = continent)) +
+grafico_dispersion <- ggplot(datos_2007, aes(gdpPercap, lifeExp, shape = continent, color = continent)) +
   geom_point()
 ```
 
@@ -710,3 +758,9 @@ Si deseas conocer más sobre `ggplot2` puedes revisar su libro oficial y su "Coo
 
 - [Libro](https://ggplot2-book.org/index.html): Teoría y ejemplos claros
 - [Cookbook](https://r-graphics.org/): Ejemplos extensivos
+
+## Retroalimentación
+
+Gracias por tu participación en la sesión de hoy. Para terminar, llena la encuesta de retroalimentación.
+
+<https://bit.ly/Retro-Taller-I>
