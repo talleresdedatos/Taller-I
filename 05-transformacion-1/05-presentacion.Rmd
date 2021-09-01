@@ -1,0 +1,579 @@
+---
+title: "Transformación de datos I"
+author: "Samuel Calderon"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Lecturas recomendadas
+
+Esta sesión está basada en el capítulo "Data transformation" del libro [R for Data Science](https://r4ds.had.co.nz/transform.html) escrito por Hadley Wickham (autor del paquete `dplyr`).
+
+También te puede ser útil revisar el capítulo "The tidyverse" del libro [Introduction to Data Science](https://rafalab.github.io/dsbook/tidyverse.html) escrito por Rafael A. Irizarry, o el capítulo "Data Wrangling" del libro [Statistical Inference via Data Science](https://moderndive.com/3-wrangling.html) escrito por Chester Ismay & Albert Y. Kim (aquí se acuñó el término *los cinco gráficos nombrados*).
+
+## Proyecto de ejercicios
+
+Para trabajar los ejercicios en esta sesión, crea un nuevo proyecto llamado "05-ejercicios".
+
+Recomiendo empezar desde el inicio creando un documento R Markdown en el que vayas tomando notas y ejemplos. Ese mismo documento puede ser subido a tu perfil de Rpubs.com.
+
+## Tibbles
+
+Hasta el momento hemos trabajado usando tablas que hemos leído desde un paquete descargado o que hemos importado desde un archivo local. 
+
+Por ejemplo, `gapminder`.
+
+Cuando lo leemos, obtenemos un *tibble*.
+
+---
+
+```{r}
+library(gapminder)
+
+gapminder
+```
+
+---
+
+Un tibble es una tipo especial de tabla. R muestra un tibble en una manera sencilla: Se mostrarán solo las 10 primeras filas del tibble, así como todas las columnas que quepan en tu ventana de consola o documento R Markdown. R también agrega información útil acerca del tibble, como los tipos de datos de cada columna y el tamaño del conjunto de datos.
+
+Los tibbles son una versión mejorada de los *data.frames*, la forma en que R trabaja con datos tabulares.
+
+---
+
+Los tibble son objetos ampliamente utilizados en la actualidad y son parte fundamental del [*tidyverse*](https://www.tidyverse.org/), un conjunto de paquetes que comparten una filosofía en común, con el fin de hacer el análisis de datos más accesible y reproducible. 
+
+Esta filosofía es visiblemente respaldada por los desarrolladores de RStudio. Debido a esta popularidad , es bastante probable que cuando veas que alguien está hablando de un data.frame, en realidad se esté refiriendo a un tibble.
+
+```{r, eval=FALSE}
+library(tidyverse) # carga el paquete tibble
+```
+
+
+## View()
+
+Es posible acceder a una ventana de visualización de tablas en el panel de Edición si usamos la función `View()` en nuestra sesión de RStudio. Es el mismo panel que aparece cuando hacemos click en el nombre de una tabla en el *Environment*.
+
+```{r, eval=FALSE}
+View(gapminder)
+```
+
+![](images/View.png){width=400px}
+
+## Ejercicio 1
+
+Visualiza el conjunto de datos `diamonds` del paquete `ggplot2`.
+
+## Ejercicio 2
+
+1. Instala el paquete `nycflights13`.
+2. Explora el conjunto de datos `flights` en tu documento R Markdown.
+
+Puedes consultar la documentación del conjunto de datos usando:
+
+```{r}
+help("flights")
+```
+
+
+# El paquete `dplyr`
+
+---
+
+El paquete `dplyr` nos permite transformar nuestros datos tabulares. Una ventaja de este paquete es que sus funciones utilizan verbos para representar las acciones que queremos realizar en el contexto de nuestro análisis de datos. Por ejemplo:
+
+- **Seleccionar** variables por su nombre con `select()`.
+- **Filtrar** observaciones de acuerdo a sus valores con `filter()`.
+- **Organizar** las filas de acuerdo a sus valores con `arrange()`.
+- **Modificar** las variables de nuestro conjunto de datos con `mutate()`.
+- **Resumir** nuestros datos en valores representativos con `summarise()`.
+- **Agrupar** nuestros datos para operar en ellos con `group_by()`.
+
+---
+
+Otra característica de las funciones *verbo* de `dplyr` es que su primer argumento será siempre el *tibble* que queremos transformar. Más adelante, esto permitirá encadenar las funciones con el operador *pipe*.
+
+Todas las operaciones descritas anteriormente pueden hacerse con funciones de *R base*, sin embargo no con una interfaz consistente entre funciones y paquetes.
+
+Para poder usar sus funciones, debemos cargar el paquete. Como forma parte de los paquetes del tidyverse, podemos cargar todos juntos a la vez.
+
+---
+
+```{r dplyr}
+# Para cargar sólo dplyr
+library(dplyr)
+```
+
+---
+
+```{r, include=FALSE}
+detach(package:dplyr)
+```
+
+
+```{r}
+# Para cargar todo el tidyverse
+library(tidyverse)
+```
+
+
+# Transformación de datos I: columnas existentes {.smaller}
+
+---
+
+Para esta sección, usaremos como ejemplo el conjunto de datos `gapminder` del paquete `gapminder`.
+
+```{r, eval=FALSE}
+install.packages("gapminder") # para instalar el paquete
+```
+
+```{r}
+library(gapminder) # para cargar el paquete
+```
+
+## {.smaller}
+
+```{r}
+gapminder
+```
+
+## `rename()`
+
+Esta función nos permite cambiar el nombre de nuestras columnas. Debemos especificar:
+
+1. El nombre del conjunto de datos
+2. El cambio de nombre, usando la sintaxis `nuevo_nombre = nombre_anterior`
+
+```{r, eval=FALSE}
+# ejemplo
+rename(data, nombre_nuevo = nombre_anterior)
+```
+
+---
+
+```{r}
+rename(gapminder, pais = country)
+```
+
+## {.smaller}
+
+Es posible cambiar más de un nombre a la vez.
+
+```{r}
+rename(gapminder, 
+       pais = country,
+       continente = continent, 
+       anio = year,
+       exp_de_vida = lifeExp,
+       poblacion = pop,
+       pbi_per_cap = gdpPercap)
+```
+
+## `relocate()`
+
+Esta función permite cambiar la ubicación de nuestras columnas. Debemos especificar:
+
+1. El nombre del conjunto de datos
+2. Los nombres de columna que queremos reubicar
+
+
+```{r, eval=FALSE}
+relocate(data, columna_reubicada1, columna_reubicada2, ...)
+```
+
+---
+
+Por defecto, pondrá las columnas especificadas como primera columna.
+
+```{r}
+relocate(gapminder, gdpPercap)
+```
+
+---
+
+Es posible especificar una posición en especial con los argumentos `.before` (antes) o `.after` (después).
+
+```{r}
+relocate(gapminder, gdpPercap, .before = year)
+```
+
+---
+
+```{r}
+relocate(gapminder, gdpPercap, .after = year)
+```
+
+## `select()`
+
+La función `select()` nos permite seleccionar columnas específicas de nuestro  tibble Supongamos que sólo queremos los nombres de los países, el año y el total de población. Podemos hacerlo con `select()`.
+
+Debemos especificar:
+
+1. El nombre del conjunto de datos
+2. Las variables a escoger
+
+```{r, eval=FALSE}
+select(data, columna_escogida1, columna_escogida2, ...)
+```
+
+---
+
+Las columnas escogidas aparecen en el orden especificado.
+
+```{r}
+select(gapminder, country, year, pop)
+```
+
+---
+
+También es posible escoger columnas usando su posición en el conjunto de datos con números.
+
+```{r}
+select(gapminder, 1, 3, 5)
+```
+
+Sin embargo, no recomiendo usar esta manera de selección.
+
+## Quitar variables {.smaller}
+
+Si por el contrario, lo que queremos es dejar fuera alguna variable, basta con anteponerle el signo negativo al nombre de la columna. En este ejemplo queremos dejar fuera la columna `pop` y `lifeExp`.
+
+```{r}
+select(gapminder, -pop, -lifeExp)
+```
+
+
+## Cambiar nombres con `select()` {.smaller}
+
+Si usamos una sintaxis como la de `rename()`, podemos cambiar el nombre de las columnas al mismo tiempo que seleccionarlas.
+
+```{r}
+select(gapminder, 
+       pais = country, 
+       anio = year,
+       poblacion = pop)
+```
+
+## Opciones avanzadas de selección
+
+La función `select()` puede hacer uso de funciones de apoyo del paquete `tidyselect()`, que se cargan automáticamente junto con `dplyr`.
+
+Para ejemplificar, usaremos el conjunto de datos `flights` del paquete `nycflights13`.
+
+---
+
+```{r}
+library(nycflights13)
+
+flights
+```
+
+## Secuencia de variables {.smaller}
+
+Es posible seleccionar una secuencia de variables consecutivas si usamos el operador de secuencia (`:`).
+
+```{r}
+select(flights, dep_time:sched_arr_time)
+```
+
+## Seleccionar basado en patrón {.smaller}
+
+Es posible usar funciones que nos permiten hacer *match* de los nombres de nuestras columnas con caracteres de texto:
+
+- `starts_with()`: El nombre empieza con un prefijo determinado
+- `ends_with()`: El nombre termina con un sufijo determinado
+- `contains()`: El nombre contiene una cadena de texto
+- `matches()`: El nombre hace *match* con una *expresión regular* (avanzado)
+
+Los patrones de texto deben especificarse entre comillas (`"`).
+
+---
+
+```{r}
+select(flights, starts_with("dep"))
+```
+
+---
+
+```{r}
+select(flights, ends_with("delay"))
+```
+
+---
+
+```{r}
+select(flights, contains("time"))
+```
+
+---
+
+```{r}
+select(flights, matches("a(i|r)r_time"))
+```
+
+## Combinando todo {.smaller}
+
+Es posible combinar todas las formas de selección dentro de una sola llamada a `select()`.
+
+```{r}
+select(flights, year:day, starts_with("arr"))
+```
+
+## Ejercicio
+
+Usando `flights`, recrea el siguiente conjunto de datos.
+
+```{r, echo=FALSE}
+flights %>% 
+    select(dia = day, mes = month, anio = year, contains("dep")) %>% 
+    relocate(dep_delay)
+```
+
+# Descanso de 5 minutos
+
+# Transformación de datos I: filas {.smaller}
+
+## filter()
+
+La función `filter()` nos simplifica la tarea de hacer *subsetting* (escoger un subconjunto de nuestros datos). Debemos especificar dos elementos:
+
+1. El nombre del conjunto de datos
+2. La condición que tiene cumplir una observación para permanecer.
+
+Para establecer las condiciones, debemos usar operaciones lógicas. Del mismo modo que los operadores aritméticos nos permiten obtener un resultado aritmético (*aka*, numérico) en nuestros cálculos, existen otros operadores que nos permiten obtener resultados lógicos.
+
+En esta sección, usaremos `gapminder` como ejemplo.
+
+## Operadores relacionales
+
+Los primeros de ellos son los relacionales, y ya los conocemos desde el colegio, pero es bueno saber cómo escribirlos en R. La siguiente tabla nos muestra para qué sirve cada uno de ellos.
+
+|Operador|Uso              |
+|-------:|:----------------|
+|`==`    |Igual que        |
+|`!=`    |Diferente que    |
+|`>`     |Mayor que        |
+|`<`     |Menor que        |
+|`>=`    |Mayor o igual que|
+|`<=`    |Menor o igual que|
+
+## Subsetting con operadores relacionales {.smaller}
+
+De entre todas las observaciones, podemos escoger aquellas cuyo país sea "Perú". Para ello, usamos la operación `country == "Peru"`.
+
+```{r}
+filter(gapminder, country == "Peru")
+```
+
+---
+
+También podemos hacer comparaciones basadas en números. Por ejemplo, todas las observaciones correspondientes al año 2007.
+
+```{r}
+filter(gapminder, year == 2007)
+```
+
+---
+
+Podemos escoger sólo aquellas observaciones que cuya población sea mayor a mil millones.
+
+```{r}
+filter(gapminder, pop > 1000000000)
+```
+
+---
+
+Podemos escoger las observaciones cuya expectativa de vida sea menor a 30 años.
+
+```{r}
+filter(gapminder, lifeExp < 30)
+```
+## Combinar más de una condición {.smaller}
+
+Si usamos más de una condición, sólo permanecerán aquellas que cumplan con todas las expuestas. Por ejemplo, observaciones donde la población sea mayor a mil millones y la expectativa de vida mayor a 70 años.
+
+```{r}
+filter(gapminder, pop > 1000000000, lifeExp > 70)
+```
+
+---
+
+Países de América a partir del 2002 cuyo PBI per cápita fue mayor a $15000.
+
+```{r}
+filter(gapminder, continent == "Americas", year >= 2002, gdpPercap > 15000)
+```
+
+## Operadores lógicos
+
+Para potenciar nuestras habilidades de comparación, podemos hacer uso de operadores lógicos. La siguiente tabla te muestra cuáles son:
+
+|Operador|Uso      |
+|-------:|:--------|
+|`&`     |Y lógico |
+|`|`     |O lógico |
+|`!`     |NO lógico|
+
+Pueden usarse para obtener combinar comparaciones.
+
+## `&` (Y lógico)
+
+El Y lógico, en el contexto de `filter()` funciona de manera similar a ir agregando nuevas condiciones. Permite que permanezcan observaciones que satisfagan **todas** las condiciones. Por ejemplo, para obtener observaciones donde la población sea mayor a mil millones y la expectativa de vida mayor a 70 años.
+
+```{r}
+filter(gapminder, pop > 1000000000 & lifeExp > 70)
+```
+
+## ` | ` (O lógico)
+
+El O lógico permite que permanezcan las observaciones que satisfagan **al menos una** de las condiciones indicadas. Por ejemplo, para obtener las observaciones correspondientes a Perú o Colombia.
+
+```{r}
+filter(gapminder, country == "Peru" | country == "Colombia")
+```
+
+## {.smaller}
+
+Es posible ir agregando cuantos O lógicos sean necesarios para obtener todas las observaciones de un listado de países. Por ejemplo, los que pertenecen a la Alianza del Pacífico.
+
+```{r}
+filter(gapminder,
+       country == "Peru" | country == "Chile"| country == "Colombia"| country == "Mexico")
+```
+
+## `%in%`
+
+Sin embargo, R permite usar el operador `%in%` para usar condiciones basadas en un O lógico de manera más sencilla.
+
+```{r}
+filter(gapminder, country %in% c("Peru", "Chile", "Colombia", "Mexico"))
+```
+
+## `!` (NO lógico)
+
+Por último, puedes usar un NO lógico para obtener lo opuesto a lo indicado en tu condición. Por ejemplo, observaciones cuyo continente no sea Américas o Europa.
+
+```{r}
+filter(gapminder, ! continent %in% c("Americas", "Europe"))
+```
+
+## Ejercicio 1
+
+Recrea el siguiente conjunto de datos usando `gapminder`. Usa country.
+
+```{r, echo=FALSE}
+gapminder %>% 
+    filter(country == "Mexico")
+```
+
+## Ejercicio 2
+
+Recrea el siguiente conjunto de datos. Usa continent, year y gdpPercap.
+
+```{r, echo=FALSE}
+gapminder %>% 
+    filter(continent == "Europe", year > 1990, gdpPercap < 6000)
+```
+
+## Ejercicio 3
+
+Recrea el siguiente conjunto de datos. Usa country y lifeExp.
+
+```{r, echo=FALSE}
+gapminder %>% 
+    filter(country %in% c("Peru", "Venezuela"), lifeExp < 50 | lifeExp > 70)
+```
+
+## Ejercicio 4 - Opcional
+
+Responde las siguientes preguntas:
+
+- ¿Cuántos países de Asia y África fueron incluidos en el conjunto de datos para el año 2007?
+
+- ¿Cuántos de esos países tenían una esperanza de vida mayor a 60 años?
+
+# Descanso de 5 minutos
+
+## gapminder_subset {.smaller}
+
+Para el siguiente verbo vamos a trabajar con un subconjunto de observaciones de gapminder.
+
+```{r}
+gapminder_subset <- filter(gapminder, 
+       country %in% c("Peru", "Chile", "Colombia", "Mexico"),
+       year >= 2002)
+```
+
+
+```{r}
+gapminder_subset
+```
+
+`gapminder_subset` está ordenado por el orden alfabético de la columna `country`.
+
+## `arrange()`
+
+La utilidad de `arrange()` es que nos permite ordenar nuestros datos en base a las variables que escojamos. Debes identificar:
+
+1. El nombre del conjunto de datos
+2. Las columnas para el ordenamiento y su tipo de orden.
+
+Por defecto, el conjunto de datos se ordenará de manera ascendente. Los caracteres de texto se ordenarán en orden alfabético y los números de menor a mayor.
+
+---
+
+Podemos indicar que el conjunto de datos se ordene por año.
+
+```{r arrange_ejm1}
+arrange(gapminder_subset, year)
+```
+
+---
+
+Ahora aparecen primero los datos del 2002 y luego los del 2007. Por defecto, el orden se hace en forma ascendente. Si uso la función `desc()` rodeando la columna elegida, el orden ahora es *descendente*.
+
+```{r arrange_ejm2}
+arrange(gapminder_subset, desc(year))
+```
+
+---
+
+Puedo ordenar en base a más de una columna, sólo debo agregarla como otro argumento. Por ejemplo, si quiero ver el orden en las expectativas de vida por año.
+
+```{r arrange_ejm3}
+arrange(gapminder_subset, year, lifeExp)
+```
+
+En ambos años, Perú tuvo la expectativa de vida más baja.
+
+## Ejercicio integrador 1
+
+Recrea el siguiente conjunto de datos usando `select()`, `filter()` y `arrange()`. Recuerda que al resultado de cada operación puedes asignarle un nombre con `<-`.
+
+```{r, echo=FALSE}
+gapminder %>% 
+    filter(continent == "Americas", year == 1952, gdpPercap > 3500) %>% 
+    arrange(desc(gdpPercap)) %>% 
+    select(country, continent, year, gdpPercap)
+```
+
+## Ejercicio integrador 2
+
+Recrea el siguiente conjunto de datos usando `select()`, `filter()` y `arrange()`. Recuerda que al resultado de cada operación puedes asignarle un nombre con `<-`.
+
+```{r, echo=FALSE}
+gapminder %>% 
+    filter(continent %in% c("Americas", "Europe"), year == 2007, lifeExp > 80) %>% 
+    select(pais = country, continente = continent, anio = year, exp_de_vida = lifeExp) %>% 
+    arrange(exp_de_vida)
+```
+
+## Retroalimentación
+
+Gracias por tu participación en la sesión de hoy. Para terminar, llena la encuesta de retroalimentación.
+
+<https://bit.ly/Retro-Taller-I>
+

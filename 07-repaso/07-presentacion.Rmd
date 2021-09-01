@@ -1,0 +1,116 @@
+---
+title: "Repaso"
+author: "Samuel Calderon"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Objetivo {.smaller}
+
+La sesión de hoy se enfocará en obtener respuestas de un conjunto de datos. Para ello, se usarán las funciones conocidas en el transcurso del taller.
+
+```{r, echo=TRUE}
+library(tidyverse)
+```
+
+
+## Conjunto de datos
+
+Usaremos "censo2017_cap200.csv". Contiene información sobre el censo de comisarías realizado el 2017. Puedes descargar pulsando el siguiente botón.
+
+```{r}
+downloadthis::download_file(
+path = "censo2017_cap200.csv",
+output_name = "censo2017_cap200.csv",
+button_label = "Descargar datos",
+button_type = "success",
+has_icon = TRUE,
+icon = "fa fa-save"
+)
+```
+
+```{r message=FALSE, warning=FALSE}
+censo2017 <- read_csv("censo2017_cap200.csv")
+```
+
+## Ejercicio 1: Lima
+
+Responder las siguientes preguntas:
+
+- ¿Cuántas comisarías tiene Lima Metropolitana?
+- ¿Cuáles son los distritos de Lima Metropolitana con mayor número de comisarías? Top 10
+
+Pista: Usa `filter()`, `summarise()`, `group_by()` y `arrange()`.
+
+
+## Ejercicio 2: Costa Norte
+
+Consideremos que en la Costa Norte están las regiones de La Libertad, Lambayeque, Piura y Tumbes.
+
+Responder las siguientes preguntas:
+
+- ¿Cuántas comisarías tiene la Costa Norte?
+- ¿Cuáles son los distritos de la Costa Norte con mayor número de comisarías? Top 10
+
+Pista: Usa `filter()`, `summarise()`, `group_by()` y `arrange()`.
+
+## Ejercicio 3: Toda la Costa
+
+Consideremos que la costa peruana se divide así:
+
+- Norte: La Libertad, Lambayeque, Piura, Tumbes
+- Centro: Ancash, Lima, Ica
+- Sur: Arequipa, Moquegua, Tacna
+
+Responder las siguientes preguntas:
+
+- ¿Cuántas comisarías tiene cada sección de la costa peruana?
+- ¿Cuáles son las provincias de la costa peruana con mayor número de comisarías? Top 10
+
+Pista: Usa `mutate()`, `filter()`, `summarise()`, `group_by()`, y `arrange()`.
+
+## Ejercicio 4: Todo el Perú
+
+Responder las siguientes preguntas:
+
+- ¿Cuáles son las regiones con mayor número de comisarías? Top 10
+- ¿Cuáles son las provincias con mayor número de comisarías? Top 10
+- ¿Cuáles son los distritos con mayor número de comisarías? Top 10
+
+# Descanso de 15 minutos
+
+## Ejercicio 5: Area ocupada en Madre de Dios
+
+- ¿Cuál es el porcentaje de área ocupada por comisaría en Madre de Dios?
+
+Puedes calcular el porcentaje así:
+
+$$
+\%\,area\,ocupada = \frac{area\,ocupada}{area\,terreno}\times{100}
+$$
+
+Pista: Usa `filter()` y `mutate()`
+
+## Ejercicio 6: Area ocupada en la costa
+
+- ¿Cuál es el promedio del porcentaje de área ocupada por comisaría en la costa peruana? Divídelo en Norte, Centro y Sur
+
+Pista: Usa `filter()`, `mutate()`, `group_by()` y `summarise()`
+
+## Ejercicio 7: Area ocupada en todo el Perú
+
+- ¿Cuáles son las regiones con menor promedio de porcentaje de área ocupada por comisaría en el país?
+- ¿Cuáles son las provincias con menor promedio de porcentaje de área ocupada por comisaría en el país?
+- ¿Cuáles son los distritos con menor promedio de porcentaje de área ocupada por comisaría en el país?
+
+Pista: Usa `filter()`, `mutate()`, `group_by()` y `summarise()`
+
+## Ejercicio 8: Area techada en todo el Perú
+
+- ¿Cuáles son las regiones con mayor mediana de porcentaje de área techada por comisaría en el país?
+- ¿Cuáles son las provincias con mayor mediana de porcentaje de área techada por comisaría en el país?
+- ¿Cuáles son los distritos con mayor mediana de porcentaje de área techada por comisaría en el país?
+

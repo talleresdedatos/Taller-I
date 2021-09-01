@@ -1,0 +1,103 @@
+---
+title: "Ejercicios resueltos"
+author: "Samuel Calderon"
+date: "31/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+
+comisarias <- read_csv("censo2017_cap200.csv")
+```
+
+
+## Ejercicio 1: Lima
+
+Responder las siguientes preguntas:
+
+- ¿Cuántas comisarías tiene Lima Metropolitana?
+
+```{r}
+comisarias %>% 
+    filter(provincia == "LIMA")
+```
+
+¿Cuáles son los distritos de Lima Metropolitana con mayor número de comisarías? Top 10
+
+```{r}
+comisarias %>% 
+    filter(provincia == "LIMA") %>% 
+    group_by(distrito) %>% 
+    summarise(recuento = n()) %>% 
+    arrange(desc(recuento))
+```
+
+
+## Ejercicio 2: Costa Norte
+
+Consideremos que en la Costa Norte están las regiones de La Libertad, Lambayeque, Piura y Tumbes.
+
+Responder las siguientes preguntas:
+
+¿Cuántas comisarías tiene la Costa Norte?
+
+```{r}
+comisarias %>% 
+    filter(region %in% c("LA LIBERTAD", "LAMBAYEQUE", "PIURA", "TUMBES"))
+```
+
+¿Cuáles son los distritos de la Costa Norte con mayor número de comisarías? Top 10
+
+```{r}
+comisarias %>% 
+    filter(region %in% c("LA LIBERTAD", "LAMBAYEQUE", "PIURA", "TUMBES")) %>% 
+    group_by(provincia, distrito) %>% 
+    summarise(recuento = n()) %>% 
+    ungroup() %>% 
+    arrange(desc(recuento))
+```
+
+## Ejercicio 3: Toda la Costa
+
+Consideremos que la costa peruana se divide así:
+
+Norte: La Libertad, Lambayeque, Piura, Tumbes
+Centro: Ancash, Lima, Ica
+Sur: Arequipa, Moquegua, Tacna
+Responder las siguientes preguntas:
+
+- ¿Cuántas comisarías tiene cada sección de la costa peruana?
+
+```{r}
+comisarias %>% 
+    mutate(seccion = case_when(
+        region %in% c("LA LIBERTAD", "LAMBAYEQUE", "PIURA", "TUMBES") ~ "Costa Norte",
+        region %in% c("ANCASH", "LAMBAYEQUE", "PIURA", "TUMBES") ~ "Costa Norte",
+        region %in% c("LA LIBERTAD", "LAMBAYEQUE", "PIURA", "TUMBES") ~ "Costa Norte",
+        TRUE ~ "Otro"
+    ))
+```
+
+
+- ¿Cuáles son las provincias de la costa peruana con mayor número de comisarías? Top 10
+Pista: Usa mutate(), filter(), summarise(), group_by(), y arrange().
+
+
+```{r}
+comisarias %>% 
+mutate(costa_peruana = case_when(region %in% c("LA LIBERTAD", "LAMBAYEQUE", "PIURA", "TUMBES") ~ "costa norte",
+                               region %in% c("ANCASH", "LIMA", "ICA") ~ "costa centro",
+                               region %in% c("AREQUIPA", "MOQUEGUA", "TACNA") ~ "costa sur",
+                               TRUE ~ "otro")) %>% 
+group_by(costa_peruana) %>% 
+summarise(recuento = n()) %>% 
+ungroup() %>% 
+arrange(desc(recuento)) %>% 
+filter(costa_peruana != "otro")
+```
+

@@ -1,0 +1,50 @@
+```{r}
+library(tidyverse)
+library(haven)
+library(perupobreza2018)
+
+ubigeos <- perupobreza2018::pobreza2018 %>% 
+    select(region:ubigeo)
+```
+
+```{r}
+cap200 <- read_sav("data/Cap 200_Infraestructura_I parte 2017.sav")
+```
+
+```{r}
+limpio <- cap200 %>% 
+    select(id = ID_N, 
+           ubigeo = UBIGEO,
+           area_terreno_m2 = INF203, 
+           area_ocupada_m2 = INF204,
+           area_disponible_m2 = INF205,
+           area_techada_m2 = INF206,
+           antiguedad_anios = INF207,
+           tiene_planos = INF208,
+           planos_actualizados = INF209,
+           material_predom_paredes = INF212,
+           estado_conserv_paredes = INF212A_1,
+           material_predom_pisos = INF213,
+           estado_conserv_pisos = INF213A_1,
+           material_predom_techo = INF214,
+           estado_conserv_techo = INF214A_1,
+           electricidad_7_dias = INF217,
+           electricidad_con = INF218,
+           agua_procedencia = INF225,
+           agua_potable = INF225A,
+           agua_7_dias = INF226,
+           banio_coneccion = INF230
+           ) %>% 
+    as_factor() %>% 
+    left_join(ubigeos) %>% 
+    relocate(region, provincia, distrito, .after = ubigeo)
+
+```
+
+```{r}
+write_csv(limpio, "censo2017_cap200.csv")
+```
+
+
+
+

@@ -26,6 +26,18 @@ knitr::opts_chunk$set(
     - "fallecidos_covid.csv"
     
 ```{r, echo=FALSE}
+downloadthis::download_dir(
+  "data",
+  output_name = "data",
+  button_label = "Descargar data",
+  button_type = "success",
+  has_icon = TRUE,
+  icon = "fa fa-save"
+)
+```
+
+    
+```{r, echo=FALSE}
 library(tidyverse)
 tabla1 <- read_csv("data/tabla1.csv")
 tabla2 <- read_csv("data/tabla2.csv")
@@ -622,7 +634,7 @@ left_join(gapminder_life_pop, gapminder_gdp, by = c("country" = "pais", "year"))
 
 ## Con pipes
 
-
+Uniendo todo en un solo procedimiento.
 
 ```{r}
 analisis1 <- gapminder_life %>% 
@@ -634,10 +646,73 @@ analisis1 <- gapminder_life %>%
     summarise(promedio_pbi = mean(gdpPercap))
 ```
 
-```{r}
+---
 
+```{r}
+analisis1
 ```
 
+---
+
+```{r}
+ggplot(analisis1, aes(year, promedio_pbi, color = continent)) +
+    geom_line()
+```
+
+
+## Recapitulación
+
+```{r}
+(tabla_izquierda <- tibble(a = c(1, 2, 3, 4), 
+                          b = c("a", "b", "c", "d"),
+                          c = c("uno", "dos", "tres", "cuatro")))
+```
+
+---
+
+```{r}
+(tabla_derecha1 <- tibble(a = c(1, 2, 3, 3),
+                         d = c("hola", "buenos", "dias", "amigo")))
+```
+
+---
+
+```{r}
+(tabla_derecha2 <- tibble(a = c(2, 3, 4, 5),
+                         b = c("w", "x", "y", "z"),
+                         d = c("b", "c", "d", "e")))
+```
+
+---
+
+```{r}
+left_join(tabla_izquierda, tabla_derecha1)
+```
+
+---
+
+```{r}
+left_join(tabla_izquierda, tabla_derecha2)
+```
+
+---
+
+```{r}
+left_join(tabla_izquierda, tabla_derecha2, by = "a")
+```
+
+---
+
+```{r}
+left_join(tabla_izquierda, tabla_derecha2, by = c("a", "b" = "d"))
+```
+
+
+## Retroalimentación
+
+Gracias por tu participación en la sesión de hoy. Para terminar, llena la encuesta de retroalimentación.
+
+<https://bit.ly/Retro-Taller-I>
 
 
 
